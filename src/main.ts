@@ -7,7 +7,7 @@ export default class PadGridPlugin extends Plugin {
 
     async onload() {
 
-        console.log("PadGrid loaded");
+        // console.log("PadGrid loaded");
 
         this.registerMarkdownCodeBlockProcessor(
             "64padgrid",
@@ -127,7 +127,7 @@ export default class PadGridPlugin extends Plugin {
     }
 
     onunload() {
-        console.log("PadGrid unloaded");
+        // console.log("PadGrid unloaded");
     }
 
     private renderPadGrid(
