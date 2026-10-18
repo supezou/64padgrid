@@ -236,7 +236,7 @@ export default class PadGridPlugin extends Plugin {
 
                     cell.addEventListener(
                         "click",
-                        async () => {
+                        () => {
 
                             // Cycle: o → x → R → o
                             row[x] =
@@ -246,7 +246,7 @@ export default class PadGridPlugin extends Plugin {
                                         ? "o"
                                         : "x";
 
-                            refreshCell();
+                            void refreshCell();
 
                             const pattern =
                                 this.serializeAll(
