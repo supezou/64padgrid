@@ -1,11 +1,9 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+    "id": "64padgrid",
+    "name": "64 Pad Grid",
+    "version": "0.0.1",
+    "minAppVersion": "1.5.0",
+    "description": "Draw clickable pad patterns for grid controllers in your notes",
+    "author": "Satoshi Nagata",
+    "isDesktopOnly": false
 }

@@ -1,8 +1,54 @@
-/*
+/* Breathing room above and below the rendered grids */
+.pad-grid-block {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* Multiple grids sit side by side, wrapping on narrow panes */
+.pad-grid-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: calc(var(--pad-size, 48px) / 2);
+}
 
-If your plugin does not need CSS, delete this file.
+.pad-toolbar {
+    margin-bottom: 10px;
+}
 
-*/
+.pad-toolbar button {
+    cursor: pointer;
+}
+
+.pad-grid {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pad-row {
+    display: flex;
+    gap: 4px;
+}
+
+.pad-cell {
+    border-radius: 8px;
+    background: #e0e0e0;
+    border: 1px solid #c0c0c0;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    width: var(--pad-size, 48px);
+    height: var(--pad-size, 48px);
+}
+
+.pad-cell.active {
+    background: var(--pad-color);
+    border-color: var(--pad-color);
+    box-shadow: 0 0 calc(var(--pad-size, 48px) / 4) var(--pad-color);
+}
+
+.pad-cell.active.root {
+    background: var(--pad-root-color);
+    border-color: var(--pad-root-color);
+    box-shadow: 0 0 calc(var(--pad-size, 48px) / 4) var(--pad-root-color);
+}

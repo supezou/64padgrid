@@ -1,114 +1,371 @@
 import {
-	Editor,
-	MarkdownView,
-	MarkdownFileInfo,
-	Modal,
-	Notice,
-	Plugin,
-} from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	MyPluginSettings,
-	SampleSettingTab,
-} from './settings';
+    Plugin,
+    MarkdownPostProcessorContext
+} from "obsidian";
 
-// Remember to rename these classes and interfaces!
+export default class PadGridPlugin extends Plugin {
 
-export default class MyPlugin extends Plugin {
-	settings!: MyPluginSettings;
+    async onload() {
 
-	async onload() {
-		await this.loadSettings();
+        console.log("PadGrid loaded");
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
+        this.registerMarkdownCodeBlockProcessor(
+            "64padgrid",
+            (source, el, ctx) => {
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
+                const lines = source
+                    .split("\n")
+                    .map(line => line.trim());
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			},
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (
-				editor: Editor,
-				_ctx: MarkdownView | MarkdownFileInfo,
-			) => {
-				editor.replaceSelection('Sample editor command');
-			},
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+                let color = "#44cc66";
+                let rootColor = "#ff8c1a";
+                let size = 30;
+                let label = "";
+                let showPattern = false;
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			},
-		});
+                // Consecutive pattern lines form one grid; a blank or
+                // settings line starts the next one
+                const patternGroups: string[][] = [];
+                let currentGroup: string[] = [];
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+                const endGroup = () => {
+                    if (currentGroup.length > 0) {
+                        patternGroups.push(currentGroup);
+                        currentGroup = [];
+                    }
+                };
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(activeDocument, 'click', (_evt: MouseEvent) => {
-			new Notice('Click');
-		});
+                for (const line of lines) {
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(
-			window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000),
-		);
-	}
+                    if (!line) {
+                        endGroup();
+                        continue;
+                    }
 
-	onunload() {}
+                    const match = line.match(
+                        /^([a-zA-Z]+)\s*=\s*(.+)$/
+                    );
 
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<MyPluginSettings>,
-		);
-	}
+                    if (match) {
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
+                        const key = match[1];
+                        const value = match[2];
 
-class SampleModal extends Modal {
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
+                        if (!key || !value) {
+                            continue;
+                        }
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
+                        switch (key.trim()) {
+
+                            case "label":
+                                label = value.trim();
+                                break;
+
+                            case "color":
+                                color = value.trim();
+                                break;
+
+                            case "rootColor":
+                                rootColor = value.trim();
+                                break;
+
+                            case "size":
+                                size = Number(
+                                    value.trim()
+                                );
+                                break;
+
+                            case "showPattern":
+                                showPattern =
+                                    value
+                                        .trim()
+                                        .toLowerCase() === "true";
+                                break;
+                        }
+
+                        endGroup();
+                        continue;
+                    }
+
+                    if (line.includes("|")) {
+                        currentGroup.push(line);
+                    }
+                    else {
+                        endGroup();
+                    }
+                }
+
+                endGroup();
+
+                const grids = patternGroups
+                    .map(group =>
+                        group
+                            .join("")
+                            .split("|")
+                            .map(r => r.trim())
+                            .filter(r => r.length > 0)
+                    )
+                    .filter(rows => rows.length > 0);
+
+                if (grids.length === 0) {
+                    return;
+                }
+
+                this.renderPadGrid(
+                    grids,
+                    source,
+                    el,
+                    ctx,
+                    color,
+                    rootColor,
+                    size,
+                    label,
+                    showPattern
+                );
+            }
+        );
+    }
+
+    onunload() {
+        console.log("PadGrid unloaded");
+    }
+
+    private renderPadGrid(
+        grids: string[][],
+        originalSource: string,
+        container: HTMLElement,
+        ctx: MarkdownPostProcessorContext,
+        color: string,
+        rootColor: string,
+        size: number,
+        label: string,
+        showPattern: boolean
+    ) {
+
+        // 'R' marks a root note; everything else is case-insensitive
+        const states = grids.map(
+            rows => rows.map(
+                row => [...row].map(
+                    c => c === "R" || c === "r"
+                        ? "R"
+                        : c.toLowerCase()
+                )
+            )
+        );
+
+        let currentSource = originalSource;
+
+        const settingsSource =
+            originalSource
+                .split("\n")
+                .map(line => line.trim())
+                .filter(
+                    line =>
+                        line.length > 0 &&
+                        !line.includes("|")
+                )
+                .join("\n");
+
+        // Per-block values consumed by styles.css
+        container.addClass("pad-grid-block");
+
+        container.setCssProps({
+            "--pad-size": `${size}px`,
+            "--pad-color": color,
+            "--pad-root-color": rootColor
+        });
+
+        if (label) {
+
+            container.createEl(
+                "div",
+                {
+                    text: label,
+                    cls: "pad-label"
+                }
+            );
+        }
+
+        // Multiple grids sit side by side, wrapping on narrow panes
+        const gridRow = container.createDiv({
+            cls: "pad-grid-row"
+        });
+
+        const output =
+            showPattern
+                ? container.createEl(
+                    "pre",
+                    {
+                        text: this.serializeAll(states)
+                    }
+                )
+                : null;
+
+        states.forEach((state) => {
+
+            const grid = gridRow.createDiv({
+                cls: "pad-grid"
+            });
+
+            state.forEach((row) => {
+
+                const rowEl = grid.createDiv({
+                    cls: "pad-row"
+                });
+
+                row.forEach((_, x) => {
+
+                    const cell = rowEl.createDiv({
+                        cls: "pad-cell"
+                    });
+
+                    const refreshCell = () => {
+
+                        cell.toggleClass(
+                            "active",
+                            row[x] === "x" || row[x] === "R"
+                        );
+
+                        cell.toggleClass(
+                            "root",
+                            row[x] === "R"
+                        );
+                    };
+
+                    refreshCell();
+
+                    cell.addEventListener(
+                        "click",
+                        async () => {
+
+                            // Cycle: o → x → R → o
+                            row[x] =
+                                row[x] === "x"
+                                    ? "R"
+                                    : row[x] === "R"
+                                        ? "o"
+                                        : "x";
+
+                            refreshCell();
+
+                            const pattern =
+                                this.serializeAll(
+                                    states
+                                );
+
+                            if (output) {
+                                output.setText(
+                                    pattern
+                                );
+                            }
+
+                            const newSource =
+                                settingsSource.length > 0
+                                    ? `${settingsSource}\n\n${pattern}`
+                                    : pattern;
+
+                            await this.savePattern(
+                                ctx,
+                                currentSource,
+                                newSource
+                            );
+
+                            currentSource =
+                                newSource;
+                        }
+                    );
+                });
+            });
+        });
+    }
+
+    // One pattern line per grid, separated by blank lines
+    private serializeAll(
+        states: string[][][]
+    ): string {
+
+        return states
+            .map(state => this.serialize(state))
+            .join("\n\n");
+    }
+
+    private serialize(
+        state: string[][]
+    ): string {
+
+        return (
+            state
+                .map(
+                    row =>
+                        "|" +
+                        row.join("")
+                )
+                .join("") +
+            "|"
+        );
+    }
+
+    private async savePattern(
+        ctx: MarkdownPostProcessorContext,
+        oldSource: string,
+        newSource: string
+    ) {
+
+        const file =
+            this.app.vault.getFileByPath(
+                ctx.sourcePath
+            );
+
+        if (!file) {
+            return;
+        }
+
+        newSource = newSource.replace(
+            /\n{3,}/g,
+            "\n\n"
+        );
+
+        let content =
+            await this.app.vault.read(
+                file
+            );
+
+        const oldBlock =
+[
+    "```64padgrid",
+    oldSource,
+    "```"
+].join("\n");
+
+        const newBlock =
+[
+    "```64padgrid",
+    newSource,
+    "```"
+].join("\n");
+
+        if (
+            !content.includes(
+                oldBlock
+            )
+        ) {
+
+            console.warn(
+                "64padgrid: block not found"
+            );
+
+            return;
+        }
+
+        content =
+            content.replace(
+                oldBlock,
+                newBlock
+            );
+
+        await this.app.vault.modify(
+            file,
+            content
+        );
+    }
 }

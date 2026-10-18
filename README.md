@@ -1,92 +1,133 @@
-# Obsidian Sample Plugin
+# 64 Pad Grid
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An [Obsidian](https://obsidian.md) plugin that draws pad patterns for 8×8 grid controllers (Ableton Push, Launchpad and the like) inside your notes. You write a pattern in a `64padgrid` code block and the plugin renders it as a clickable grid. Clicking a pad saves the change back to the note.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Use it to write down scale shapes, chord voicings, finger-drumming layouts or anything else you play on a pad grid.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+## Features
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+- Draws pad patterns as glowing, clickable grids.
+- Marks root notes in their own colour.
+- Click a pad to cycle it **off → on → root → off**. The note updates as you click.
+- Puts several grids side by side in one block, wrapping on narrow panes.
+- Lets you set the pad size, colours and a label for each block.
+- Can show the raw pattern text under the grids.
+- Isn't limited to 8×8: a grid has as many rows and columns as you write.
 
-## First time developing plugins?
+## Usage
 
-Quick starting guide for new plugin devs:
+Create a code block with the language `64padgrid`:
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+````markdown
+```64padgrid
+label = My shape
 
-## Releasing new releases
+|oooooooo|oooooooo|ooxooxoo|oRooooRo|ooxooxoo|oooooooo|oooooooo|oooooooo|
+```
+````
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### Pattern syntax
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+Each `|` starts a row, and each character after it is one pad.
 
-## Adding your plugin to the community plugin list
+| Character | Pad |
+| --- | --- |
+| `x` or `X` | On (pad colour) |
+| `R` or `r` | Root (root colour) |
+| anything else, e.g. `o` | Off |
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+The first row you write is drawn at the top. You can keep a pattern on one line or split it across lines, one row per line:
 
-## How to use
+````markdown
+```64padgrid
+|oooooooo
+|oooxoooo
+|ooRoxooo
+|oooxoooo
+```
+````
 
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+### Multiple grids
 
-## Manually installing the plugin
+Put a blank line between patterns to draw them side by side:
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+````markdown
+```64padgrid
+label = Two shapes
+size = 24
 
-## Improve code quality with eslint
+|oooo|oxxo|oRxo|oooo|
 
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+|xooo|oxoo|ooRo|ooox|
+```
+````
 
-## Funding URL
+A settings line between patterns also starts a new grid.
 
-You can include funding URLs where people who use your plugin can financially support it.
+### Settings
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+Write settings as `key = value` lines anywhere in the block. They apply to every grid in the block.
 
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
+| Setting | Default | Description |
+| --- | --- | --- |
+| `label` | *(none)* | Text shown above the grids |
+| `color` | `#44cc66` | Colour of pads that are on |
+| `rootColor` | `#ff8c1a` | Colour of root pads |
+| `size` | `30` | Pad width and height in pixels |
+| `showPattern` | `false` | `true` shows the pattern text under the grids |
+
+`color` and `rootColor` take any CSS colour, such as `#3399ff`, `tomato` or `rgb(255 0 128)`.
+
+### Editing by clicking
+
+Clicking a pad rewrites the code block in your note:
+
+- Settings lines move to the top of the block.
+- Each grid is saved as a single pattern line, with a blank line between grids.
+
+If the block in the file changed while the note was open (for example, you edited it in source mode), the plugin doesn't overwrite it. Reopen the note and click again.
+
+## Installation
+
+The plugin isn't in the Community Plugins directory yet, so install it by hand:
+
+1. Download `main.js`, `manifest.json` and `styles.css` from the latest release.
+2. Copy them into `<your vault>/.obsidian/plugins/64padgrid/`.
+3. Reload Obsidian, then turn on **64 Pad Grid** in **Settings → Community plugins**.
+
+The plugin works on desktop and mobile and needs Obsidian 1.5.0 or later.
+
+## Customising the look
+
+All styling is in `styles.css`. To change the look without editing the plugin, override these classes in a [CSS snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets):
+
+| Class | Element |
+| --- | --- |
+| `.pad-grid-block` | The whole code block |
+| `.pad-label` | The label |
+| `.pad-grid-row` | The row that holds the grids |
+| `.pad-grid` | One grid |
+| `.pad-row` | One row of pads |
+| `.pad-cell` | One pad (gets `.active` when on and `.root` for a root) |
+
+Each block also sets the CSS variables `--pad-size`, `--pad-color` and `--pad-root-color` from its settings.
+
+## Development
+
+You need Node.js 18 or later.
+
+```bash
+npm install
 ```
 
-If you have multiple URLs, you can also do:
-
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
+```bash
+npm run dev
 ```
 
-## API Documentation
+`npm run dev` rebuilds `main.js` whenever you change a file. Use `npm run build` for a production build and `npm run lint` to run ESLint.
 
-See https://docs.obsidian.md
+For quicker testing, clone the repo straight into `<your vault>/.obsidian/plugins/64padgrid/` and reload Obsidian after each build.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
