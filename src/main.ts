@@ -246,7 +246,7 @@ export default class PadGridPlugin extends Plugin {
                                         ? "o"
                                         : "x";
 
-                            void refreshCell();
+                            refreshCell();
 
                             const pattern =
                                 this.serializeAll(
@@ -264,7 +264,7 @@ export default class PadGridPlugin extends Plugin {
                                     ? `${settingsSource}\n\n${pattern}`
                                     : pattern;
 
-                            await this.savePattern(
+                            void this.savePattern(
                                 ctx,
                                 currentSource,
                                 newSource
