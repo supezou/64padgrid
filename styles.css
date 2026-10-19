@@ -2,6 +2,20 @@
 .pad-grid-block {
     margin-top: 1em;
     margin-bottom: 1em;
+    position: relative;
+    /* Long-press opens the settings menu, so stop iOS showing its own
+       callout or selecting text; taps register without a zoom delay */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+/* ⋯ settings button in the block's top-right corner */
+.pad-menu-button {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 /* Multiple grids sit side by side, wrapping on narrow panes */
@@ -39,6 +53,72 @@
     transition: all 0.1s ease;
     width: var(--pad-size, 48px);
     height: var(--pad-size, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: calc(var(--pad-size, 48px) * 0.54);
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Invisible anchor for the system colour picker */
+.pad-color-picker {
+    position: fixed;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Floating panel opened from the settings menu */
+.pad-popover {
+    position: fixed;
+    z-index: var(--layer-menu);
+    padding: 8px 12px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-s);
+}
+
+/* Mobile colour panel: title and one colour input */
+.pad-color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pad-color-row input[type="color"] {
+    width: 44px;
+    height: 32px;
+}
+
+/* Size slider */
+.pad-size-popover {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pad-prompt-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pad-prompt-input {
+    flex: 1;
+}
+
+/* Shrink longer labels like "C#m" so they fit */
+.pad-cell.long-label {
+    font-size: calc(var(--pad-size, 48px) * 0.32);
 }
 
 .pad-cell.active {

@@ -1,7 +1,7 @@
 {
     "id": "sixtyfourpadgrid",
     "name": "64 Pad Grid",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "minAppVersion": "1.5.7",
     "description": "Draw clickable pad patterns for grid controllers in your notes.",
     "author": "Satoshi Nagata",
