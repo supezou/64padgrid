@@ -3,7 +3,7 @@
     "name": "64 Pad Grid",
     "version": "1.0.0",
     "minAppVersion": "1.5.7",
-    "description": "Draw clickable pad patterns for grid controllers in your notes",
+    "description": "Draw clickable pad patterns for grid controllers in your notes.",
     "author": "Satoshi Nagata",
     "isDesktopOnly": false
 }
