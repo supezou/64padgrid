@@ -8,10 +8,14 @@ Use it to write down scale shapes, chord voicings, finger-drumming layouts or an
 
 - Draws pad patterns as glowing, clickable grids.
 - Marks root notes in their own colour.
+- Shows text on pads, such as finger numbers or note names.
 - Click a pad to cycle it **off → on → root → off**. The note updates as you click.
+- Double-click a pad to give it a text label.
+- Change settings from a menu: colours, pad size, label and more, with a live preview.
+- Keeps your code block's line breaks and layout when it saves.
 - Puts several grids side by side in one block, wrapping on narrow panes.
-- Lets you set the pad size, colours and a label for each block.
 - Can show the raw pattern text under the grids.
+- Works with touch on mobile.
 - Isn't limited to 8×8: a grid has as many rows and columns as you write.
 
 ## Usage
@@ -28,13 +32,25 @@ label = My shape
 
 ### Pattern syntax
 
-Each `|` starts a row, and each character after it is one pad.
+Each `|` starts a row, and each character after it is one pad. Spaces inside a row are ignored.
 
 | Character | Pad |
 | --- | --- |
+| `o` or `O` | Off |
 | `x` or `X` | On (pad colour) |
-| `R` or `r` | Root (root colour) |
-| anything else, e.g. `o` | Off |
+| `R` or `r` | Root (root colour), showing "R" |
+| any other character, e.g. `3` | On (pad colour), showing that character |
+| `[text]`, e.g. `[C#m]` | On (pad colour), showing the text |
+
+Use brackets for labels longer than one character. A label can't contain `|`, `[` or `]`.
+
+````markdown
+```64padgrid
+|o3xoxoxo
+|Roxoxxoo
+|oo[C#m]xoooo
+```
+````
 
 The first row you write is drawn at the top. You can keep a pattern on one line or split it across lines, one row per line:
 
@@ -75,15 +91,40 @@ Write settings as `key = value` lines anywhere in the block. They apply to every
 | `rootColor` | `#ff8c1a` | Colour of root pads |
 | `size` | `30` | Pad width and height in pixels |
 | `showPattern` | `false` | `true` shows the pattern text under the grids |
+| `showText` | `true` | `false` hides the text on pads; labelled pads stay lit |
 
 `color` and `rootColor` take any CSS colour, such as `#3399ff`, `tomato` or `rgb(255 0 128)`.
 
-### Editing by clicking
+You can also change every setting from the [settings menu](#settings-menu) instead of typing it.
 
-Clicking a pad rewrites the code block in your note:
+### Editing pads
 
-- Settings lines move to the top of the block.
-- Each grid is saved as a single pattern line, with a blank line between grids.
+- **Click** a pad to cycle it **off → on → root → off**. A click on a labelled pad turns it off.
+- **Double-click** a pad to type a label for it. Leave the field empty to keep the pad on without a label. Typing `o`, `x` or `R` sets the pad to off, on or root.
+
+A single click waits a quarter of a second before it takes effect, so that a double-click can be told apart from it.
+
+### Settings menu
+
+Open the menu by clicking the **⋯** button in the block's top-right corner, right-clicking the block, or long-pressing it on a touch screen.
+
+| Item | What it does |
+| --- | --- |
+| **Show text on pads** | Turns `showText` on or off |
+| **Show pattern** | Turns `showPattern` on or off |
+| **Label** | Opens a field to type the label |
+| **Pad color**, **Root color** | Opens the colour picker. The pads recolour as you pick |
+| **Size** | Opens a slider. The pads resize as you drag. Press Enter or click outside to keep the size, or Esc to cancel |
+| **Reset pad color**, **Reset root color**, **Reset size** | Puts the setting back to its default. Greyed out when it's already the default |
+
+On mobile, **Pad color** and **Root color** open a small panel. If the colour picker doesn't open by itself, tap the colour box in the panel.
+
+### How changes are saved
+
+Every change is written straight back into the code block in your note:
+
+- Clicking or labelling a pad changes only that pad's characters. Line breaks, blank lines and indentation stay as you wrote them.
+- Changing a setting from the menu edits its line where it is, or adds a new line at the top of the block. Going back to a default removes the line.
 
 If the block in the file changed while the note was open (for example, you edited it in source mode), the plugin doesn't overwrite it. Reopen the note and click again.
 
@@ -95,7 +136,7 @@ The plugin isn't in the Community Plugins directory yet, so install it by hand:
 2. Copy them into `<your vault>/.obsidian/plugins/64padgrid/`.
 3. Reload Obsidian, then turn on **64 Pad Grid** in **Settings → Community plugins**.
 
-The plugin works on desktop and mobile and needs Obsidian 1.5.0 or later.
+The plugin works on desktop and mobile and needs Obsidian 1.5.7 or later.
 
 ## Customising the look
 
@@ -108,7 +149,8 @@ All styling is in `styles.css`. To change the look without editing the plugin, o
 | `.pad-grid-row` | The row that holds the grids |
 | `.pad-grid` | One grid |
 | `.pad-row` | One row of pads |
-| `.pad-cell` | One pad (gets `.active` when on and `.root` for a root) |
+| `.pad-cell` | One pad (gets `.active` when on, `.root` for a root and `.long-label` for labels over two characters) |
+| `.pad-menu-button` | The ⋯ settings button |
 
 Each block also sets the CSS variables `--pad-size`, `--pad-color` and `--pad-root-color` from its settings.
 
