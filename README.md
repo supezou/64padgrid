@@ -1,5 +1,7 @@
 # 64 Pad Grid
 
+**Version 1.0.2** · Requires Obsidian 1.5.7 or later · [Changelog](#changelog)
+
 An [Obsidian](https://obsidian.md) plugin that draws pad patterns for 8×8 grid controllers (Ableton Push, Launchpad and the like) inside your notes. You write a pattern in a `64padgrid` code block and the plugin renders it as a clickable grid. Clicking a pad saves the change back to the note.
 
 Use it to write down scale shapes, chord voicings, finger-drumming layouts or anything else you play on a pad grid.
@@ -42,7 +44,7 @@ Each `|` starts a row, and each character after it is one pad. Spaces inside a r
 | any other character, e.g. `3` | On (pad colour), showing that character |
 | `[text]`, e.g. `[C#m]` | On (pad colour), showing the text |
 
-Use brackets for labels longer than one character. A label can't contain `|`, `[` or `]`.
+Pad text is available from version 1.0.2. Use brackets for labels longer than one character. A label can't contain `|`, `[` or `]`.
 
 ````markdown
 ```64padgrid
@@ -84,14 +86,14 @@ A settings line between patterns also starts a new grid.
 
 Write settings as `key = value` lines anywhere in the block. They apply to every grid in the block.
 
-| Setting | Default | Description |
-| --- | --- | --- |
-| `label` | *(none)* | Text shown above the grids |
-| `color` | `#44cc66` | Colour of pads that are on |
-| `rootColor` | `#ff8c1a` | Colour of root pads |
-| `size` | `30` | Pad width and height in pixels |
-| `showPattern` | `false` | `true` shows the pattern text under the grids |
-| `showText` | `true` | `false` hides the text on pads; labelled pads stay lit |
+| Setting | Default | Description | Since |
+| --- | --- | --- | --- |
+| `label` | *(none)* | Text shown above the grids | 1.0.1 |
+| `color` | `#44cc66` | Colour of pads that are on | 1.0.1 |
+| `rootColor` | `#ff8c1a` | Colour of root pads | 1.0.1 |
+| `size` | `30` | Pad width and height in pixels | 1.0.1 |
+| `showPattern` | `false` | `true` shows the pattern text under the grids | 1.0.1 |
+| `showText` | `true` | `false` hides the text on pads; labelled pads stay lit | 1.0.2 |
 
 `color` and `rootColor` take any CSS colour, such as `#3399ff`, `tomato` or `rgb(255 0 128)`.
 
@@ -100,13 +102,13 @@ You can also change every setting from the [settings menu](#settings-menu) inste
 ### Editing pads
 
 - **Click** a pad to cycle it **off → on → root → off**. A click on a labelled pad turns it off.
-- **Double-click** a pad to type a label for it. Leave the field empty to keep the pad on without a label. Typing `o`, `x` or `R` sets the pad to off, on or root.
+- **Double-click** a pad to type a label for it (from 1.0.2). Leave the field empty to keep the pad on without a label. Typing `o`, `x` or `R` sets the pad to off, on or root.
 
 A single click waits a quarter of a second before it takes effect, so that a double-click can be told apart from it.
 
 ### Settings menu
 
-Open the menu by clicking the **⋯** button in the block's top-right corner, right-clicking the block, or long-pressing it on a touch screen.
+*Added in 1.0.2.* Open the menu by clicking the **⋯** button in the block's top-right corner, right-clicking the block, or long-pressing it on a touch screen.
 
 | Item | What it does |
 | --- | --- |
@@ -123,7 +125,7 @@ On mobile, **Pad color** and **Root color** open a small panel. If the colour pi
 
 Every change is written straight back into the code block in your note:
 
-- Clicking or labelling a pad changes only that pad's characters. Line breaks, blank lines and indentation stay as you wrote them.
+- Clicking or labelling a pad changes only that pad's characters. Line breaks, blank lines and indentation stay as you wrote them. (Up to 1.0.1, saving moved settings to the top and put each grid on one line.)
 - Changing a setting from the menu edits its line where it is, or adds a new line at the top of the block. Going back to a default removes the line.
 
 If the block in the file changed while the note was open (for example, you edited it in source mode), the plugin doesn't overwrite it. Reopen the note and click again.
@@ -169,6 +171,24 @@ npm run dev
 `npm run dev` rebuilds `main.js` whenever you change a file. Use `npm run build` for a production build and `npm run lint` to run ESLint.
 
 For quicker testing, clone the repo straight into `<your vault>/.obsidian/plugins/64padgrid/` and reload Obsidian after each build.
+
+## Changelog
+
+### 1.0.2
+
+- **Pad text:** any character other than `o`, `x` or `R` lights the pad and shows that character; `[text]` shows longer labels. Root pads show "R".
+- **Labels:** double-click or double-tap a pad to edit its label.
+- **Settings menu:** open it with the ⋯ button, right-click or long-press to toggle options, pick colours and resize pads with a live preview, or reset to defaults.
+- **New setting:** `showText` hides or shows the text on pads.
+- **Touch support:** double-tap and long-press work on mobile, and iOS no longer shows its own long-press popup over grids.
+- **Layout kept on save:** clicking a pad changes only that pad's characters instead of rewriting the whole block.
+- **Changed:** characters other than `o`, `x` and `R` used to show as empty pads; they now show as labelled pads. Spaces inside a row are ignored.
+- **Fixed:** a `$` in a label no longer garbles the saved text.
+- **Docs:** the README now gives the correct minimum Obsidian version, 1.5.7 (unchanged since 1.0.1).
+
+### 1.0.1
+
+- First release: clickable pad grids with root notes, multiple grids per block, and the `label`, `color`, `rootColor`, `size` and `showPattern` settings.
 
 ## License
 
